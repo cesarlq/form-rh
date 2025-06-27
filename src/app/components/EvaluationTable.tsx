@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Category } from '@/lib/types';
 
 interface EvaluationTableProps {
@@ -23,9 +24,9 @@ export default function EvaluationTable({ categories, totalScore, onScoreUpdate 
         </thead>
         <tbody>
           {categories.map((category) => (
-            <>
+            <React.Fragment key={category.id}>
               {/* Category Header */}
-              <tr key={category.id} className="bg-blue-50 font-semibold text-blue-900">
+              <tr className="bg-blue-50 font-semibold text-blue-900">
                 <td colSpan={5} className="p-4 border-b border-gray-200">
                   <strong>{category.name}</strong>
                 </td>
@@ -67,7 +68,7 @@ export default function EvaluationTable({ categories, totalScore, onScoreUpdate 
                   </td>
                 </tr>
               ))}
-            </>
+            </React.Fragment>
           ))}
           
           {/* Total Row */}

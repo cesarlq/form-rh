@@ -13,6 +13,30 @@ interface PDFGeneratorProps {
 export default function PDFGenerator({ candidateInfo, categories, evaluationResult, totalScore }: PDFGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Function to clean text for PDF generation
+  const cleanTextForPDF = (text: string): string => {
+    return text
+      // Remove all emojis
+      .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
+      // Replace specific emoji patterns
+      .replace(/🔥|🎯|⚡|🏆|🤝|🚀|❌|👤|📅|💼/g, '')
+      // Clean up extra spaces
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  // Function to get category name without emojis
+  const getCategoryDisplayName = (categoryName: string): string => {
+    const categoryMap: { [key: string]: string } = {
+      '🔥 CULTURA T1 (30%)': 'CULTURA T1 (30%)',
+      '⚡ TÉCNICO AVANZADO (40%)': 'TECNICO AVANZADO (40%)',
+      '🏆 EXPERIENCIA ESPECÍFICA (20%)': 'EXPERIENCIA ESPECIFICA (20%)',
+      '🤝 SOFT SKILLS CRÍTICAS (10%)': 'SOFT SKILLS CRITICAS (10%)'
+    };
+    
+    return categoryMap[categoryName] || cleanTextForPDF(categoryName);
+  };
+
   const generatePDF = async () => {
     if (!evaluationResult) return;
 
@@ -56,53 +80,149 @@ export default function PDFGenerator({ candidateInfo, categories, evaluationResu
       }
       
       pdf.setTextColor(...resultColor);
-      const resultText = evaluationResult.message.replace(/🚀|⚡|❌/g, '').trim();
+      const resultText = cleanTextForPDF(evaluationResult.message);
       pdf.text(resultText, 20, 125);
       
-      // Category breakdown
-      pdf.setFontSize(12);
-      pdf.setTextColor(0, 0, 0);
+      // Create table with visual format
       let yPosition = 145;
       
-      pdf.text('DESGLOSE POR CATEGORÍAS:', 20, yPosition);
-      yPosition += 15;
+      // Table header
+      pdf.setFillColor(30, 60, 114); // Blue header
+      pdf.rect(20, yPosition, 170, 12, 'F');
+      pdf.setTextColor(255, 255, 255); // White text
+      pdf.setFontSize(10);
+      pdf.text('Categoria / Criterio', 25, yPosition + 8);
+      pdf.text('Descripcion / Evidencia Requerida', 70, yPosition + 8);
+      pdf.text('Peso (%)', 130, yPosition + 8);
+      pdf.text('Score (1-5)', 150, yPosition + 8);
+      pdf.text('Puntos', 170, yPosition + 8);
+      
+      yPosition += 12;
       
       categories.forEach(category => {
-        const categoryTotal = category.criteria.reduce((sum, criterion) => sum + criterion.points, 0);
-        const categoryMax = category.criteria.reduce((sum, criterion) => sum + criterion.weight, 0);
+        // Check if we need a new page
+        if (yPosition > 250) {
+          pdf.addPage();
+          yPosition = 20;
+          
+          // Repeat header on new page
+          pdf.setFillColor(30, 60, 114);
+          pdf.rect(20, yPosition, 170, 12, 'F');
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFontSize(10);
+          pdf.text('Categoria / Criterio', 25, yPosition + 8);
+          pdf.text('Descripcion / Evidencia Requerida', 70, yPosition + 8);
+          pdf.text('Peso (%)', 130, yPosition + 8);
+          pdf.text('Score (1-5)', 150, yPosition + 8);
+          pdf.text('Puntos', 170, yPosition + 8);
+          yPosition += 12;
+        }
         
-        pdf.text(`• ${category.name}: ${categoryTotal.toFixed(1)}/${categoryMax} puntos`, 25, yPosition);
+        // Category header row
+        pdf.setFillColor(240, 244, 255); // Light blue background
+        pdf.rect(20, yPosition, 170, 10, 'F');
+        pdf.setTextColor(30, 60, 114); // Blue text
+        pdf.setFontSize(9);
+        const cleanCategoryName = getCategoryDisplayName(category.name);
+        pdf.text(cleanCategoryName, 25, yPosition + 7);
+        
+        // Category border
+        pdf.setDrawColor(200, 200, 200);
+        pdf.rect(20, yPosition, 170, 10);
+        
         yPosition += 10;
-      });
-      
-      // Detailed criteria
-      yPosition += 10;
-      pdf.text('CRITERIOS EVALUADOS:', 20, yPosition);
-      yPosition += 10;
-      
-      categories.forEach(category => {
+        
+        // Category criteria
         category.criteria.forEach(criterion => {
-          if (criterion.score > 0) {
-            if (yPosition > 270) {
-              pdf.addPage();
-              yPosition = 20;
-            }
+          if (yPosition > 270) {
+            pdf.addPage();
+            yPosition = 20;
             
+            // Repeat header on new page
+            pdf.setFillColor(30, 60, 114);
+            pdf.rect(20, yPosition, 170, 12, 'F');
+            pdf.setTextColor(255, 255, 255);
             pdf.setFontSize(10);
-            pdf.text(`• ${criterion.name}: ${criterion.score}/5 (${criterion.points.toFixed(1)} pts)`, 25, yPosition);
-            yPosition += 8;
+            pdf.text('Categoria / Criterio', 25, yPosition + 8);
+            pdf.text('Descripcion / Evidencia Requerida', 70, yPosition + 8);
+            pdf.text('Peso (%)', 130, yPosition + 8);
+            pdf.text('Score (1-5)', 150, yPosition + 8);
+            pdf.text('Puntos', 170, yPosition + 8);
+            yPosition += 12;
           }
+          
+          // Criterion row background
+          pdf.setFillColor(255, 255, 255); // White background
+          pdf.rect(20, yPosition, 170, 12, 'F');
+          
+          // Criterion content
+          pdf.setTextColor(0, 0, 0);
+          pdf.setFontSize(8);
+          
+          // Criterion name (truncate if too long)
+          const cleanCriterionName = cleanTextForPDF(criterion.name);
+          const truncatedName = cleanCriterionName.length > 20 ? 
+            cleanCriterionName.substring(0, 20) + '...' : cleanCriterionName;
+          pdf.text(truncatedName, 25, yPosition + 8);
+          
+          // Description (truncate if too long)
+          const cleanDescription = cleanTextForPDF(criterion.description);
+          const truncatedDesc = cleanDescription.length > 35 ? 
+            cleanDescription.substring(0, 35) + '...' : cleanDescription;
+          pdf.text(truncatedDesc, 70, yPosition + 8);
+          
+          // Weight
+          pdf.setTextColor(42, 82, 152); // Blue color for weight
+          pdf.text(`${criterion.weight}%`, 135, yPosition + 8);
+          
+          // Score
+          pdf.setTextColor(0, 0, 0);
+          if (criterion.score > 0) {
+            pdf.text(criterion.score.toString(), 155, yPosition + 8);
+          } else {
+            pdf.text('-', 155, yPosition + 8);
+          }
+          
+          // Points
+          pdf.text(criterion.points.toFixed(1), 175, yPosition + 8);
+          
+          // Row border
+          pdf.setDrawColor(229, 231, 235);
+          pdf.rect(20, yPosition, 170, 12);
+          
+          yPosition += 12;
         });
       });
       
+      // Total row
+      if (yPosition > 260) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      
+      pdf.setFillColor(30, 60, 114); // Dark blue background
+      pdf.rect(20, yPosition, 170, 12, 'F');
+      pdf.setTextColor(255, 255, 255); // White text
+      pdf.setFontSize(10);
+      pdf.text('TOTAL', 25, yPosition + 8);
+      pdf.text('Suma ponderada de todos los criterios', 70, yPosition + 8);
+      pdf.text('100%', 135, yPosition + 8);
+      pdf.text('-', 155, yPosition + 8);
+      pdf.text(totalScore.toFixed(1), 175, yPosition + 8);
+      
       // Footer
-      const pageCount = (pdf as any).internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(8);
-        pdf.setTextColor(128, 128, 128);
-        pdf.text(`Página ${i} de ${pageCount} - Generado el ${new Date().toLocaleDateString()}`, 20, 285);
-        pdf.text('T1 Talent Hunter - Solo Rockstars', 150, 285);
+      try {
+        const pageCount = (pdf as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          pdf.setPage(i);
+          pdf.setFontSize(8);
+          pdf.setTextColor(128, 128, 128);
+          pdf.text(`Página ${i} de ${pageCount} - Generado el ${new Date().toLocaleDateString()}`, 20, 285);
+          pdf.text('T1 Talent Hunter - Solo Rockstars', 150, 285);
+        }
+      } catch (footerError) {
+        // If footer fails, continue without it
+        console.warn('Could not add footer to PDF:', footerError);
       }
       
       // Download
