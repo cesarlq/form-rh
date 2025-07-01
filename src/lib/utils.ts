@@ -43,82 +43,74 @@ export const getInitialData = () => {
   return [
     {
       id: 'cultura',
-      name: '🔥 CULTURA T1 (30%)',
+      name: '🔥 CULTURA T1 (40%)',
       criteria: [
         {
           id: 'mentalidad-dueno',
           name: 'Mentalidad de Dueño',
           description: '¿Asume responsabilidad completa? ¿Propone soluciones vs. problemas? ¿Actúa con autonomía?',
-          weight: 8,
+          weight: 12,
           score: 0,
           points: 0
         },
         {
           id: 'enfoque-cliente',
           name: 'Enfoque al Cliente',
-          description: '¿Entiende el impacto de su código en la experiencia del usuario? ¿Piensa en conversion/UX?',
-          weight: 8,
+          description: '¿Entiende el impacto de su trabajo en la experiencia del usuario? ¿Piensa en resultados de negocio?',
+          weight: 10,
           score: 0,
           points: 0
         },
         {
           id: 'obsesion-eficiencia',
           name: 'Obsesión por la Eficiencia',
-          description: '¿Optimiza código sin que se lo pidan? ¿Busca automatizar tareas repetitivas?',
-          weight: 7,
+          description: '¿Optimiza procesos sin que se lo pidan? ¿Busca automatizar tareas repetitivas? ¿Maximiza resultados?',
+          weight: 10,
           score: 0,
           points: 0
         },
         {
           id: 'innovacion-mejora',
           name: 'Innovación y Mejora Continua',
-          description: '¿Propone tecnologías nuevas? ¿Experimenta con soluciones creativas?',
-          weight: 7,
+          description: '¿Propone mejoras constantemente? ¿Experimenta con soluciones creativas? ¿Desafía el status quo?',
+          weight: 8,
           score: 0,
           points: 0
         }
       ]
     },
     {
-      id: 'tecnico',
-      name: '⚡ TÉCNICO AVANZADO (40%)',
+      id: 'competencias',
+      name: '⚡ COMPETENCIAS PROFESIONALES (35%)',
       criteria: [
         {
-          id: 'react-nextjs',
-          name: 'React.js + Next.js Mastery',
-          description: 'SSR/SSG, App Router, optimización de bundle, code splitting avanzado',
+          id: 'orientacion-resultados',
+          name: 'Orientación a Resultados',
+          description: '¿Demuestra historial de logros medibles? ¿Se enfoca en KPIs y metas ambiciosas?',
           weight: 10,
           score: 0,
           points: 0
         },
         {
-          id: 'typescript-arquitectura',
-          name: 'TypeScript + Arquitectura',
-          description: 'Tipos avanzados, generics, design patterns, arquitectura escalable',
+          id: 'resolucion-problemas',
+          name: 'Resolución de Problemas',
+          description: '¿Identifica problemas antes que otros? ¿Propone soluciones creativas? ¿Ejecuta efectivamente?',
+          weight: 10,
+          score: 0,
+          points: 0
+        },
+        {
+          id: 'toma-decisiones',
+          name: 'Toma de Decisiones',
+          description: '¿Decide con información sólida y rapidez? ¿Asume riesgos calculados? ¿Aprende de errores?',
           weight: 8,
           score: 0,
           points: 0
         },
         {
-          id: 'performance-optimization',
-          name: 'Performance & Optimization',
-          description: 'Core Web Vitals, lazy loading, memoization, lighthouse 90+',
-          weight: 8,
-          score: 0,
-          points: 0
-        },
-        {
-          id: 'state-management',
-          name: 'State Management',
-          description: 'Redux Toolkit, Zustand, React Query, manejo de cache inteligente',
-          weight: 7,
-          score: 0,
-          points: 0
-        },
-        {
-          id: 'apis-integration',
-          name: 'APIs & Integration',
-          description: 'GraphQL avanzado, REST optimizado, real-time updates, error handling',
+          id: 'adaptabilidad-agilidad',
+          name: 'Adaptabilidad y Agilidad',
+          description: '¿Se adapta rápido a cambios? ¿Aprende nuevas metodologías? ¿Responde con flexibilidad?',
           weight: 7,
           score: 0,
           points: 0
@@ -126,43 +118,35 @@ export const getInitialData = () => {
       ]
     },
     {
-      id: 'experiencia',
-      name: '🏆 EXPERIENCIA ESPECÍFICA (20%)',
+      id: 'liderazgo',
+      name: '🤝 LIDERAZGO Y COLABORACIÓN (15%)',
       criteria: [
         {
-          id: 'fintech-ecommerce',
-          name: 'Fintech/Ecommerce Experience',
-          description: 'Ha trabajado en plataformas transaccionales, pagos, checkout flows',
+          id: 'colaboracion-impacto',
+          name: 'Colaboración con Impacto',
+          description: '¿Trabaja efectivamente en equipo? ¿Contribuye al éxito colectivo? ¿Comparte conocimiento?',
           weight: 8,
           score: 0,
           points: 0
         },
         {
-          id: 'scale-traffic',
-          name: 'Scale & High Traffic',
-          description: 'Apps con 100k+ usuarios, manejo de concurrencia, monitoring',
+          id: 'comunicacion-efectiva',
+          name: 'Comunicación Efectiva',
+          description: '¿Comunica ideas complejas claramente? ¿Influye positivamente? ¿Escucha activamente?',
           weight: 7,
-          score: 0,
-          points: 0
-        },
-        {
-          id: 'business-logic',
-          name: 'Business Logic Understanding',
-          description: 'Entiende reglas de negocio complejas, traduce requisitos técnicos',
-          weight: 5,
           score: 0,
           points: 0
         }
       ]
     },
     {
-      id: 'soft-skills',
-      name: '🤝 SOFT SKILLS CRÍTICAS (10%)',
+      id: 'crecimiento',
+      name: '🚀 CRECIMIENTO Y APRENDIZAJE (10%)',
       criteria: [
         {
-          id: 'comunicacion-tecnica',
-          name: 'Comunicación Técnica',
-          description: 'Explica conceptos complejos, documenta decisiones, argumenta soluciones',
+          id: 'desafia-conocimiento',
+          name: 'Desafía su Conocimiento',
+          description: '¿Busca aprendizaje continuo? ¿Se mantiene actualizado? ¿Comparte lo aprendido?',
           weight: 5,
           score: 0,
           points: 0
@@ -170,7 +154,7 @@ export const getInitialData = () => {
         {
           id: 'velocidad-aprendizaje',
           name: 'Velocidad de Aprendizaje',
-          description: 'Se adapta rápido a nuevas tecnologías, frameworks, metodologías',
+          description: '¿Se adapta rápido a nuevas situaciones? ¿Aprende de errores? ¿Aplica conocimiento efectivamente?',
           weight: 5,
           score: 0,
           points: 0

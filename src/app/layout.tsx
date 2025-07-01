@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "T1 Frontend Developer - Scorecard de Evaluación",
+  title: " T1 Evaluación de Candidatos",
   description: "Sistema de evaluación para candidatos Frontend Developer de T1 - Solo para Rockstars",
 };
 

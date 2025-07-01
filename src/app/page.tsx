@@ -21,7 +21,7 @@ export default function Home() {
     <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-8 text-center">
-        <h1 className="text-4xl font-bold mb-3">🎯 T1 Frontend Developer</h1>
+        <h1 className="text-4xl font-bold mb-3">🎯  T1 Evaluación de Candidatos</h1>
         <p className="text-xl opacity-90">Scorecard de Evaluación - Solo para Rockstars</p>
       </div>
 

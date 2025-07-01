@@ -51,7 +51,7 @@ export default function PDFGenerator({ candidateInfo, categories, evaluationResu
       // Header
       pdf.setFontSize(20);
       pdf.setTextColor(30, 60, 114);
-      pdf.text('T1 Frontend Developer - Evaluación', 20, 30);
+      pdf.text(' T1 Candidatos - Evaluación', 20, 30);
       
       // Candidate info
       pdf.setFontSize(12);
