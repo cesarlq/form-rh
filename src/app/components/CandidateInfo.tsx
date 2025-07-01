@@ -65,11 +65,27 @@ export default function CandidateInfo({ candidateInfo, onUpdate }: CandidateInfo
             className="p-3 border-2 border-gray-300 rounded-lg text-base transition-all duration-300 bg-white focus:outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
           >
             <option value="">Seleccionar unidad...</option>
-            <option value="T1pagos">T1pagos - Frontend</option>
-            <option value="T1envios">T1envíos - Frontend</option>
-            <option value="T1tienda">T1tienda - Frontend</option>
-            <option value="T1score">T1score - Frontend</option>
-            <option value="Corporativo">Corporativo - Frontend</option>
+            <option value="T1pagos">T1pagos - Frontend Developer</option>
+            <option value="T1envios">T1envíos - Frontend Developer</option>
+            <option value="T1tienda">T1tienda - Frontend Developer</option>
+            <option value="T1score">T1score - Frontend Developer</option>
+            <option value="T1logistics">T1logistics - Frontend Developer</option>
+            <option value="T1marketplace">T1marketplace - Frontend Developer</option>
+            <option value="T1fintech">T1fintech - Frontend Developer</option>
+            <option value="T1analytics">T1analytics - Frontend Developer</option>
+            <option value="T1mobile">T1mobile - Frontend Developer</option>
+            <option value="T1platform">T1platform - Frontend Developer</option>
+            <option value="T1security">T1security - Frontend Developer</option>
+            <option value="T1ai">T1ai - Frontend Developer</option>
+            <option value="Corporativo">Corporativo - Frontend Developer</option>
+            <option value="Frontend Senior">Frontend Senior Developer</option>
+            <option value="Frontend Lead">Frontend Lead Developer</option>
+            <option value="Frontend Architect">Frontend Architect</option>
+            <option value="React Specialist">React Specialist</option>
+            <option value="Vue Specialist">Vue.js Specialist</option>
+            <option value="Angular Specialist">Angular Specialist</option>
+            <option value="Mobile Frontend">Mobile Frontend Developer</option>
+            <option value="Fullstack Frontend">Fullstack Frontend Developer</option>
           </select>
         </div>
       </div>
