@@ -10,228 +10,183 @@ interface PDFGeneratorProps {
   totalScore: number;
 }
 
+// Primary color (blue)
+const PRIMARY_COLOR: [number, number, number] = [59, 130, 246]; // Corresponds to Tailwind's blue-500
+// Text color (dark gray)
+const TEXT_COLOR: [number, number, number] = [31, 41, 55]; // Corresponds to Tailwind's gray-800
+// Muted text color (medium gray)
+const MUTED_TEXT_COLOR: [number, number, number] = [107, 114, 128]; // Corresponds to Tailwind's gray-500
+// Border color (light gray)
+const BORDER_COLOR: [number, number, number] = [229, 231, 235]; // Corresponds to Tailwind's gray-200
+// Background color for table headers (lighter gray)
+const HEADER_BG_COLOR: [number, number, number] = [243, 244, 246]; // Corresponds to Tailwind's gray-100
+
+
 export default function PDFGenerator({ candidateInfo, categories, evaluationResult, totalScore }: PDFGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Function to clean text for PDF generation
-  const cleanTextForPDF = (text: string): string => {
+  const cleanText = (text: string | undefined | null): string => {
+    if (!text) return 'N/A';
     return text
-      // Remove all emojis
       .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
-      // Replace specific emoji patterns
-      .replace(/🔥|🎯|⚡|🏆|🤝|🚀|❌|👤|📅|💼/g, '')
-      // Clean up extra spaces
+      .replace(/🔥|🎯|⚡|🏆|🤝|🚀|❌|👤|📅|💼|⭐|👍|👎/g, '')
       .replace(/\s+/g, ' ')
       .trim();
   };
 
-  // Function to get category name without emojis
-  const getCategoryDisplayName = (categoryName: string): string => {
-    const categoryMap: { [key: string]: string } = {
-      '🔥 CULTURA T1 (30%)': 'CULTURA T1 (30%)',
-      '⚡ TÉCNICO AVANZADO (40%)': 'TECNICO AVANZADO (40%)',
-      '🏆 EXPERIENCIA ESPECÍFICA (20%)': 'EXPERIENCIA ESPECIFICA (20%)',
-      '🤝 SOFT SKILLS CRÍTICAS (10%)': 'SOFT SKILLS CRITICAS (10%)'
-    };
-    
-    return categoryMap[categoryName] || cleanTextForPDF(categoryName);
-  };
-
   const generatePDF = async () => {
     if (!evaluationResult) return;
-
     setIsGenerating(true);
 
     try {
-      // Dynamic import to avoid SSR issues
       const { jsPDF } = await import('jspdf');
-      
-      const pdf = new jsPDF();
-      
+      const pdf = new jsPDF('p', 'pt', 'a4'); // Using points for better control, A4 size
+
+      const pageMargin = 40;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const contentWidth = pageWidth - 2 * pageMargin;
+      let yPos = pageMargin;
+
       // Header
       pdf.setFontSize(20);
-      pdf.setTextColor(30, 60, 114);
-      pdf.text(' T1 Candidatos - Evaluación', 20, 30);
-      
-      // Candidate info
-      pdf.setFontSize(12);
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(`Candidato: ${candidateInfo.name || 'N/A'}`, 20, 50);
-      pdf.text(`Evaluador: ${candidateInfo.interviewer || 'N/A'}`, 20, 60);
-      pdf.text(`Fecha: ${candidateInfo.date || 'N/A'}`, 20, 70);
-      pdf.text(`Posición: ${candidateInfo.position || 'Frontend Developer'}`, 20, 80);
-      
-      // Separator line
-      pdf.line(20, 90, 190, 90);
-      
-      // Total score
-      pdf.setFontSize(16);
-      pdf.setTextColor(30, 60, 114);
-      pdf.text(`PUNTUACIÓN TOTAL: ${totalScore.toFixed(1)}/100`, 20, 110);
-      
-      // Result
-      let resultColor: [number, number, number];
-      if (evaluationResult.status === 'rockstar') {
-        resultColor = [22, 163, 74]; // Green
-      } else if (evaluationResult.status === 'solid') {
-        resultColor = [217, 119, 6]; // Yellow
-      } else {
-        resultColor = [220, 38, 38]; // Red
-      }
-      
-      pdf.setTextColor(...resultColor);
-      const resultText = cleanTextForPDF(evaluationResult.message);
-      pdf.text(resultText, 20, 125);
-      
-      // Create table with visual format
-      let yPosition = 145;
-      
-      // Table header
-      pdf.setFillColor(30, 60, 114); // Blue header
-      pdf.rect(20, yPosition, 170, 12, 'F');
-      pdf.setTextColor(255, 255, 255); // White text
+      pdf.setTextColor(...PRIMARY_COLOR);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Evaluación de Candidato T1', pageMargin, yPos);
+      yPos += 30;
+
+      // Candidate Info
       pdf.setFontSize(10);
-      pdf.text('Categoria / Criterio', 25, yPosition + 8);
-      pdf.text('Descripcion / Evidencia Requerida', 70, yPosition + 8);
-      pdf.text('Peso (%)', 130, yPosition + 8);
-      pdf.text('Score (1-5)', 150, yPosition + 8);
-      pdf.text('Puntos', 170, yPosition + 8);
-      
-      yPosition += 12;
-      
-      categories.forEach(category => {
-        // Check if we need a new page
-        if (yPosition > 250) {
-          pdf.addPage();
-          yPosition = 20;
-          
-          // Repeat header on new page
-          pdf.setFillColor(30, 60, 114);
-          pdf.rect(20, yPosition, 170, 12, 'F');
-          pdf.setTextColor(255, 255, 255);
-          pdf.setFontSize(10);
-          pdf.text('Categoria / Criterio', 25, yPosition + 8);
-          pdf.text('Descripcion / Evidencia Requerida', 70, yPosition + 8);
-          pdf.text('Peso (%)', 130, yPosition + 8);
-          pdf.text('Score (1-5)', 150, yPosition + 8);
-          pdf.text('Puntos', 170, yPosition + 8);
-          yPosition += 12;
-        }
-        
-        // Category header row
-        pdf.setFillColor(240, 244, 255); // Light blue background
-        pdf.rect(20, yPosition, 170, 10, 'F');
-        pdf.setTextColor(30, 60, 114); // Blue text
+      pdf.setTextColor(...TEXT_COLOR);
+      pdf.setFont('helvetica', 'normal');
+      const infoPairs = [
+        { label: 'Candidato:', value: cleanText(candidateInfo.name) },
+        { label: 'Evaluador:', value: cleanText(candidateInfo.interviewer) },
+        { label: 'Fecha:', value: cleanText(candidateInfo.date) },
+        { label: 'Posición:', value: cleanText(candidateInfo.position) },
+      ];
+      infoPairs.forEach(pair => {
+        pdf.text(`${pair.label} ${pair.value}`, pageMargin, yPos);
+        yPos += 15;
+      });
+      yPos += 10; // Extra space before separator
+
+      // Separator
+      pdf.setDrawColor(...BORDER_COLOR);
+      pdf.line(pageMargin, yPos, pageWidth - pageMargin, yPos);
+      yPos += 25;
+
+      // Total Score & Result
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(...PRIMARY_COLOR);
+      pdf.text(`Puntuación Total: ${totalScore.toFixed(1)}/100`, pageMargin, yPos);
+      yPos += 20;
+
+      let resultColor: [number, number, number];
+      if (evaluationResult.status === 'rockstar') resultColor = [22, 163, 74]; // Green-600
+      else if (evaluationResult.status === 'solid') resultColor = [202, 138, 4]; // Amber-600
+      else resultColor = [220, 38, 38]; // Red-600
+
+      pdf.setTextColor(...resultColor);
+      pdf.setFontSize(12);
+      pdf.text(cleanText(evaluationResult.message), pageMargin, yPos, { maxWidth: contentWidth });
+      yPos += pdf.getTextDimensions(cleanText(evaluationResult.message), { maxWidth: contentWidth }).h + 20;
+
+
+      // Table
+      const tableHeaders = ['Categoría / Criterio', 'Descripción / Evidencia', 'Peso', 'Score', 'Puntos'];
+      const colWidths = [contentWidth * 0.28, contentWidth * 0.37, contentWidth * 0.1, contentWidth * 0.1, contentWidth * 0.15];
+
+      const drawTableHeader = () => {
+        pdf.setFillColor(...HEADER_BG_COLOR);
+        pdf.rect(pageMargin, yPos, contentWidth, 20, 'F');
+        pdf.setTextColor(...TEXT_COLOR);
+        pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(9);
-        const cleanCategoryName = getCategoryDisplayName(category.name);
-        pdf.text(cleanCategoryName, 25, yPosition + 7);
-        
-        // Category border
-        pdf.setDrawColor(200, 200, 200);
-        pdf.rect(20, yPosition, 170, 10);
-        
-        yPosition += 10;
-        
-        // Category criteria
+        let currentX = pageMargin;
+        tableHeaders.forEach((header, i) => {
+          pdf.text(header, currentX + 5, yPos + 14);
+          currentX += colWidths[i];
+        });
+        yPos += 20;
+      };
+
+      const checkNewPage = (neededHeight: number) => {
+        if (yPos + neededHeight > pdf.internal.pageSize.getHeight() - pageMargin) {
+          pdf.addPage();
+          yPos = pageMargin;
+          drawTableHeader();
+        }
+      };
+
+      drawTableHeader();
+
+      categories.forEach(category => {
+        checkNewPage(30); // Estimate for category header + one criterion
+        pdf.setFillColor(...HEADER_BG_COLOR); // Light background for category name
+        pdf.rect(pageMargin, yPos, contentWidth, 18, 'F');
+        pdf.setTextColor(...PRIMARY_COLOR);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(10);
+        pdf.text(cleanText(category.name), pageMargin + 5, yPos + 13);
+        yPos += 18;
+
         category.criteria.forEach(criterion => {
-          if (yPosition > 270) {
-            pdf.addPage();
-            yPosition = 20;
-            
-            // Repeat header on new page
-            pdf.setFillColor(30, 60, 114);
-            pdf.rect(20, yPosition, 170, 12, 'F');
-            pdf.setTextColor(255, 255, 255);
-            pdf.setFontSize(10);
-            pdf.text('Categoria / Criterio', 25, yPosition + 8);
-            pdf.text('Descripcion / Evidencia Requerida', 70, yPosition + 8);
-            pdf.text('Peso (%)', 130, yPosition + 8);
-            pdf.text('Score (1-5)', 150, yPosition + 8);
-            pdf.text('Puntos', 170, yPosition + 8);
-            yPosition += 12;
-          }
+          const criterionNameLines = pdf.splitTextToSize(cleanText(criterion.name), colWidths[0] - 10);
+          const descriptionLines = pdf.splitTextToSize(cleanText(criterion.description), colWidths[1] - 10);
+          const rowHeight = Math.max(criterionNameLines.length, descriptionLines.length) * 10 + 8; // 10pt line height + padding
           
-          // Criterion row background
-          pdf.setFillColor(255, 255, 255); // White background
-          pdf.rect(20, yPosition, 170, 12, 'F');
-          
-          // Criterion content
-          pdf.setTextColor(0, 0, 0);
+          checkNewPage(rowHeight);
+
+          pdf.setTextColor(...TEXT_COLOR);
+          pdf.setFont('helvetica', 'normal');
           pdf.setFontSize(8);
+
+          let currentX = pageMargin;
+          pdf.text(criterionNameLines, currentX + 5, yPos + 10);
+          currentX += colWidths[0];
+          pdf.text(descriptionLines, currentX + 5, yPos + 10);
+          currentX += colWidths[1];
+          pdf.text(`${criterion.weight}%`, currentX + colWidths[2]/2 - pdf.getTextWidth(`${criterion.weight}%`)/2, yPos + 10 + (rowHeight-8)/2 - 5);
+          currentX += colWidths[2];
+          pdf.text(criterion.score > 0 ? criterion.score.toString() : '-', currentX + colWidths[3]/2 - pdf.getTextWidth(criterion.score > 0 ? criterion.score.toString() : '-')/2, yPos + 10 + (rowHeight-8)/2 - 5);
+          currentX += colWidths[3];
+          pdf.text(criterion.points.toFixed(1), currentX + colWidths[4]/2 - pdf.getTextWidth(criterion.points.toFixed(1))/2, yPos + 10+ (rowHeight-8)/2 - 5);
           
-          // Criterion name (truncate if too long)
-          const cleanCriterionName = cleanTextForPDF(criterion.name);
-          const truncatedName = cleanCriterionName.length > 20 ? 
-            cleanCriterionName.substring(0, 20) + '...' : cleanCriterionName;
-          pdf.text(truncatedName, 25, yPosition + 8);
-          
-          // Description (truncate if too long)
-          const cleanDescription = cleanTextForPDF(criterion.description);
-          const truncatedDesc = cleanDescription.length > 35 ? 
-            cleanDescription.substring(0, 35) + '...' : cleanDescription;
-          pdf.text(truncatedDesc, 70, yPosition + 8);
-          
-          // Weight
-          pdf.setTextColor(42, 82, 152); // Blue color for weight
-          pdf.text(`${criterion.weight}%`, 135, yPosition + 8);
-          
-          // Score
-          pdf.setTextColor(0, 0, 0);
-          if (criterion.score > 0) {
-            pdf.text(criterion.score.toString(), 155, yPosition + 8);
-          } else {
-            pdf.text('-', 155, yPosition + 8);
-          }
-          
-          // Points
-          pdf.text(criterion.points.toFixed(1), 175, yPosition + 8);
-          
-          // Row border
-          pdf.setDrawColor(229, 231, 235);
-          pdf.rect(20, yPosition, 170, 12);
-          
-          yPosition += 12;
+          pdf.setDrawColor(...BORDER_COLOR);
+          pdf.line(pageMargin, yPos + rowHeight, pageWidth - pageMargin, yPos + rowHeight); // Bottom border for row
+          yPos += rowHeight;
         });
       });
       
-      // Total row
-      if (yPosition > 260) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-      
-      pdf.setFillColor(30, 60, 114); // Dark blue background
-      pdf.rect(20, yPosition, 170, 12, 'F');
-      pdf.setTextColor(255, 255, 255); // White text
+      checkNewPage(20); // For total row
+      // Total Row
+      pdf.setFillColor(...PRIMARY_COLOR);
+      pdf.rect(pageMargin, yPos, contentWidth, 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(10);
-      pdf.text('TOTAL', 25, yPosition + 8);
-      pdf.text('Suma ponderada de todos los criterios', 70, yPosition + 8);
-      pdf.text('100%', 135, yPosition + 8);
-      pdf.text('-', 155, yPosition + 8);
-      pdf.text(totalScore.toFixed(1), 175, yPosition + 8);
-      
+      pdf.text('TOTAL', pageMargin + 5, yPos + 14);
+      pdf.text('100%', pageMargin + colWidths[0] + colWidths[1] + colWidths[2]/2 - pdf.getTextWidth('100%')/2, yPos + 14);
+      pdf.text(totalScore.toFixed(1),pageMargin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4]/2 - pdf.getTextWidth(totalScore.toFixed(1))/2, yPos + 14);
+      yPos += 20;
+
       // Footer
-      try {
-        const pageCount = (pdf as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(8);
-          pdf.setTextColor(128, 128, 128);
-          pdf.text(`Página ${i} de ${pageCount} - Generado el ${new Date().toLocaleDateString()}`, 20, 285);
-          pdf.text('T1 Talent Hunter - Solo Rockstars', 150, 285);
-        }
-      } catch (footerError) {
-        // If footer fails, continue without it
-        console.warn('Could not add footer to PDF:', footerError);
+      const pageCount = (pdf as any).internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(...MUTED_TEXT_COLOR);
+        pdf.text(`Página ${i} de ${pageCount} - Generado el ${new Date().toLocaleDateString()}`, pageMargin, pdf.internal.pageSize.getHeight() - 20);
+        pdf.text('T1 Talent Evaluation', pageWidth - pageMargin - pdf.getTextWidth('T1 Talent Evaluation'), pdf.internal.pageSize.getHeight() - 20);
       }
-      
-      // Download
-      const fileName = `T1_Evaluacion_${(candidateInfo.name || 'Candidato').replace(/\s+/g, '_')}_${candidateInfo.date || new Date().toISOString().split('T')[0]}.pdf`;
+
+      const fileName = `T1_Evaluacion_${cleanText(candidateInfo.name).replace(/\s+/g, '_')}_${cleanText(candidateInfo.date)}.pdf`;
       pdf.save(fileName);
-      
+
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Error al generar el PDF. Por favor, intenta de nuevo.');
+      alert('Error al generar el PDF. Por favor, intente de nuevo.');
     } finally {
       setIsGenerating(false);
     }
@@ -240,23 +195,19 @@ export default function PDFGenerator({ candidateInfo, categories, evaluationResu
   if (!evaluationResult) return null;
 
   return (
-    <div className="text-center p-5 mx-5">
-      <button
-        onClick={generatePDF}
-        disabled={isGenerating}
-        className="bg-gradient-to-r from-green-600 to-green-500 text-white border-none py-4 px-8 rounded-xl text-lg font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-      >
-        {isGenerating ? (
-          <>
-            <span className="inline-block animate-spin mr-2">⏳</span>
-            Generando PDF...
-          </>
-        ) : (
-          <>
-            📄 Descargar Evaluación en PDF
-          </>
-        )}
-      </button>
-    </div>
+    <button
+      onClick={generatePDF}
+      disabled={isGenerating}
+      className="bg-primary hover:bg-primary/90 text-white py-2.5 px-5 rounded-md font-medium transition-colors duration-200 text-sm no-print disabled:opacity-70 disabled:cursor-not-allowed"
+    >
+      {isGenerating ? (
+        <>
+          <span className="inline-block animate-spin mr-2">⏳</span>
+          Generando PDF...
+        </>
+      ) : (
+        'Descargar PDF'
+      )}
+    </button>
   );
 }

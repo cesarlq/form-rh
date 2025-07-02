@@ -11,24 +11,25 @@ interface EvaluationTableProps {
 
 export default function EvaluationTable({ categories, totalScore, onScoreUpdate }: EvaluationTableProps) {
   return (
-    <div className="p-5 overflow-x-auto">
-      <table className="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-lg">
-        <thead>
-          <tr className="bg-gradient-to-r from-blue-800 to-blue-600 text-white">
-            <th className="p-4 text-left font-semibold text-sm w-1/4">Categoría / Criterio</th>
-            <th className="p-4 text-left font-semibold text-sm w-2/5">Descripción / Evidencia Requerida</th>
-            <th className="p-4 text-center font-semibold text-sm w-1/10">Peso (%)</th>
-            <th className="p-4 text-center font-semibold text-sm w-3/20">Score (1-5)</th>
-            <th className="p-4 text-center font-semibold text-sm w-1/10">Puntos</th>
+    <div className="overflow-x-auto rounded-md border border-border bg-card">
+      <h3 className="text-lg font-semibold text-foreground p-4 border-b border-border">Tabla de Evaluación</h3>
+      <table className="w-full text-sm">
+        <thead className="bg-background">
+          <tr>
+            <th className="p-3 text-left font-semibold text-muted-foreground w-1/4">Categoría / Criterio</th>
+            <th className="p-3 text-left font-semibold text-muted-foreground w-2/5">Descripción / Evidencia</th>
+            <th className="p-3 text-center font-semibold text-muted-foreground w-[10%]">Peso</th>
+            <th className="p-3 text-center font-semibold text-muted-foreground w-[15%]">Score (1-5)</th>
+            <th className="p-3 text-center font-semibold text-muted-foreground w-[10%]">Puntos</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-border">
           {categories.map((category) => (
             <React.Fragment key={category.id}>
               {/* Category Header */}
-              <tr className="bg-blue-50 font-semibold text-blue-900">
-                <td colSpan={5} className="p-4 border-b border-gray-200">
-                  <strong>{category.name}</strong>
+              <tr className="bg-background/50">
+                <td colSpan={5} className="p-3 font-semibold text-foreground">
+                  {category.name.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim()}
                 </td>
               </tr>
               
@@ -36,15 +37,15 @@ export default function EvaluationTable({ categories, totalScore, onScoreUpdate 
               {category.criteria.map((criterion) => (
                 <tr 
                   key={criterion.id} 
-                  className="hover:bg-blue-50 transition-colors duration-200 border-b border-gray-100"
+                  className="hover:bg-muted-foreground/5 transition-colors duration-150"
                 >
-                  <td className="p-3 font-medium text-gray-700 align-top">
+                  <td className="p-3 text-foreground align-top">
                     {criterion.name}
                   </td>
-                  <td className="p-3 text-gray-600 align-top">
+                  <td className="p-3 text-muted-foreground align-top text-xs">
                     {criterion.description}
                   </td>
-                  <td className="p-3 text-center font-semibold text-blue-600 align-top">
+                  <td className="p-3 text-center text-foreground align-top">
                     {criterion.weight}%
                   </td>
                   <td className="p-3 text-center align-top">
@@ -54,16 +55,25 @@ export default function EvaluationTable({ categories, totalScore, onScoreUpdate 
                       max="5"
                       value={criterion.score || ''}
                       onChange={(e) => {
-                        const score = parseInt(e.target.value) || 0;
-                        if (score >= 1 && score <= 5) {
+                        const rawValue = e.target.value;
+                        if (rawValue === '') {
+                           onScoreUpdate(category.id, criterion.id, 0); // Allow clearing the input
+                           return;
+                        }
+                        const score = parseInt(rawValue);
+                        if (!isNaN(score) && score >= 1 && score <= 5) {
                           onScoreUpdate(category.id, criterion.id, score);
+                        } else if (!isNaN(score) && (score < 1 || score > 5)) {
+                          // Optionally handle out-of-range input, e.g., by clamping or ignoring
+                          // For now, let's clamp to the nearest valid value if needed or just prevent update.
+                          // This example prevents update for out-of-range numbers.
                         }
                       }}
-                      className="w-16 p-2 border-2 border-gray-300 rounded-md text-center font-semibold transition-all duration-300 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                      placeholder="1-5"
+                      className="w-16 p-1.5 border border-border rounded-md text-center bg-background focus:border-primary focus:ring-1 focus:ring-primary"
+                      placeholder="-"
                     />
                   </td>
-                  <td className="p-3 text-center font-semibold text-gray-800 align-top">
+                  <td className="p-3 text-center font-medium text-foreground align-top">
                     {criterion.points.toFixed(1)}
                   </td>
                 </tr>
@@ -72,21 +82,18 @@ export default function EvaluationTable({ categories, totalScore, onScoreUpdate 
           ))}
           
           {/* Total Row */}
-          <tr className="bg-blue-900 text-white font-bold">
-            <td className="p-4">
-              <strong>TOTAL</strong>
+          <tr className="bg-primary text-white font-semibold">
+            <td className="p-3" colSpan={2}>
+              TOTAL
             </td>
-            <td className="p-4">
-              <strong>Suma ponderada de todos los criterios</strong>
+            <td className="p-3 text-center">
+              100%
             </td>
-            <td className="p-4 text-center">
-              <strong>100%</strong>
+            <td className="p-3 text-center">
+              -
             </td>
-            <td className="p-4 text-center">
-              <strong>-</strong>
-            </td>
-            <td className="p-4 text-center">
-              <strong>{totalScore.toFixed(1)}</strong>
+            <td className="p-3 text-center">
+              {totalScore.toFixed(1)}
             </td>
           </tr>
         </tbody>

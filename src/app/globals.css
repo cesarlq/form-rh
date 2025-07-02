@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f9fafb; /* Light gray background */
+  --foreground: #1f2937; /* Darker gray for text */
+  --primary: #3b82f6; /* A calm blue for primary actions */
+  --muted-foreground: #6b7280; /* Lighter gray for secondary text */
+  --card: #ffffff; /* White for card backgrounds */
+  --border: #e5e7eb; /* Light border color */
 }
 
 @theme inline {
@@ -14,29 +18,29 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: var(--background);
+  color: var(--foreground);
   min-height: 100vh;
   margin: 0;
-  padding: 20px;
+  padding: 20px; /* Add some padding around the page content */
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - kept for consistency, can be removed for ultra-minimalism */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background: #cbd5e1; /* Lighter scrollbar thumb */
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #94a3b8;
 }
 
 /* Print styles */
@@ -44,22 +48,47 @@ body {
   body {
     background: white !important;
     padding: 0 !important;
+    color: black !important;
   }
   
   .no-print {
     display: none !important;
+  }
+  .print-text-black * {
+    color: black !important;
   }
 }
 
 /* Focus styles for accessibility */
 input:focus,
 select:focus,
-button:focus {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
+button:focus,
+textarea:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); /* Softer focus ring */
 }
 
-/* Animation for loading states */
+/* General element styling for minimalism */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--foreground);
+  font-weight: 600; /* Slightly bolder headings */
+}
+
+p {
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Animation for loading states - kept as it's functional */
 @keyframes spin {
   to {
     transform: rotate(360deg);
