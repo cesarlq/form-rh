@@ -1,7 +1,7 @@
-@import "tailwindcss";
-
 /* Import Comic Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap');
+
+@import "tailwindcss";
 
 :root {
   /* Comic Color Palette */
