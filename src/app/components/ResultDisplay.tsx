@@ -18,7 +18,7 @@ export default function ResultDisplay({ evaluationResult, candidateInfo }: Resul
     panelStyle = "border-comic-primary bg-yellow-100";
     textStyle = "text-yellow-700"; // A darker yellow for text or keep it black
     icon = "🌟";
-  } else if (evaluationResult.status === 'rejected') {
+  } else if (evaluationResult.status === 'reject') { // Corrected from 'rejected' to 'reject'
     panelStyle = "border-comic-secondary bg-red-100";
     textStyle = "text-comic-secondary";
     icon = "👎";
