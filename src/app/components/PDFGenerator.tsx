@@ -157,6 +157,7 @@ export default function PDFGenerator({ candidateInfo, categories, evaluationResu
       yPos += 20;
 
       // Footer
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pageCount = (pdf as any).internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
