@@ -77,7 +77,7 @@ export default function PDFGenerator({ candidateInfo, categories, evaluationResu
       let resultColorPDF: [number, number, number] = [0,0,0]; // black default
       if (evaluationResult.status === 'rockstar') resultColorPDF = [34, 139, 34]; // Forest Green
       else if (evaluationResult.status === 'solid') resultColorPDF = [255, 165, 0]; // Orange
-      else if (evaluationResult.status === 'rejected') resultColorPDF = [220, 20, 60]; // Crimson
+      else if (evaluationResult.status === 'reject') resultColorPDF = [220, 20, 60]; // Crimson
 
       pdf.setTextColor(...resultColorPDF);
       pdf.text(cleanTextForPDF(evaluationResult.message), pageMargin, yPos, { maxWidth: contentWidth });
@@ -157,6 +157,7 @@ export default function PDFGenerator({ candidateInfo, categories, evaluationResu
       yPos += 20;
 
       // Footer
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pageCount = (pdf as any).internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
