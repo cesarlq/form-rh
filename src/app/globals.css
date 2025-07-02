@@ -1,65 +1,135 @@
+/* Import Comic Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap');
+
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Comic Color Palette */
+  --comic-bg: #ffffff; /* White background, like a comic page */
+  --comic-panel-bg: #f0f8ff; /* Very light blue for panels, optional */
+  --comic-text: #000000; /* Black text for dialogues and descriptions */
+  --comic-primary: #ffcc00; /* Bright Yellow for accents, like "POW!" */
+  --comic-secondary: #ff3333; /* Bright Red for other accents or warnings */
+  --comic-tertiary: #3399ff; /* Bright Blue for information or neutral elements */
+  --comic-border: #000000; /* Thick black borders */
+
+  /* Font Variables */
+  --font-display: 'Bangers', cursive; /* For main titles, big impact text */
+  --font-body: 'Comic Neue', cursive; /* For body text, inputs, buttons */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* These might not be directly used if we override all Tailwind colors, but good for reference */
+  --color-background: var(--comic-bg);
+  --color-foreground: var(--comic-text);
+  --font-sans: var(--font-body); /* Overriding Tailwind's default sans */
+  --font-mono: var(--font-geist-mono); /* Keep mono for code if any, or change too */
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: var(--font-body);
+  background-color: var(--comic-bg); /* Plain white or a very light off-white */
+  color: var(--comic-text);
   min-height: 100vh;
   margin: 0;
-  padding: 20px;
+  padding: 10px; /* Reduced padding for a fuller feel */
+  border: 5px solid var(--comic-border); /* Border around the whole page like a comic book cover */
+  box-sizing: border-box;
 }
 
-/* Custom scrollbar */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--comic-text); /* Black for headings, or could be primary/secondary */
+  text-shadow: 2px 2px 0px var(--comic-primary); /* Yellow shadow for pop */
+  -webkit-text-stroke: 1px var(--comic-border); /* Black stroke for headings */
+  paint-order: stroke fill;
+  letter-spacing: 0.05em; /* A bit more spacing for Bangers */
+}
+
+h1 {
+  font-size: 3.5rem; /* Larger for main titles */
+  margin-bottom: 0.5em;
+}
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 0.4em;
+}
+h3 {
+  font-size: 2rem;
+  margin-bottom: 0.3em;
+}
+
+p, li, span, label, div { /* Apply comic body font widely */
+  font-family: var(--font-body);
+  font-size: 1.1rem; /* Slightly larger base font size */
+  line-height: 1.5;
+}
+
+a {
+  color: var(--comic-tertiary); /* Blue for links */
+  font-weight: bold;
+  text-decoration: none;
+}
+a:hover {
+  color: var(--comic-secondary); /* Red on hover */
+  text-decoration: underline;
+}
+
+/* Custom scrollbar - let's make it comic-like too! */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 12px;
+  border-left: 2px solid var(--comic-border);
 }
-
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: var(--comic-primary); /* Yellow track */
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background: var(--comic-secondary); /* Red thumb */
+  border: 2px solid var(--comic-border);
+  border-radius: 0; /* Square thumb */
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #cc0000; /* Darker Red on hover */
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
 
 /* Print styles */
 @media print {
   body {
     background: white !important;
     padding: 0 !important;
+    border: none !important;
   }
-  
+  h1, h2, h3, h4, h5, h6 {
+    text-shadow: none !important;
+    -webkit-text-stroke: none !important;
+    color: black !important;
+  }
   .no-print {
     display: none !important;
   }
 }
 
-/* Focus styles for accessibility */
+/* Focus styles for accessibility - comic style! */
 input:focus,
 select:focus,
-button:focus {
-  outline: 2px solid #2563eb;
+button:focus,
+textarea:focus {
+  outline: 3px dashed var(--comic-secondary) !important; /* Dashed red outline */
   outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--comic-primary) !important; /* Yellow glow */
 }
 
-/* Animation for loading states */
+/* Global border style for comic panels */
+.comic-panel {
+  border: 3px solid var(--comic-border);
+  background-color: var(--comic-panel-bg); /* Optional: light background for panels */
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 5px 5px 0px var(--comic-border); /* Solid black shadow */
+}
+
+/* Animation for loading states - keep as is or style if needed */
 @keyframes spin {
   to {
     transform: rotate(360deg);

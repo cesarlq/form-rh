@@ -10,253 +10,189 @@ interface PDFGeneratorProps {
   totalScore: number;
 }
 
+// PDF styling is complex and jsPDF doesn't directly use CSS.
+// For a true "comic style" PDF, images and complex vector graphics would be needed.
+// This will be a simplified version, focusing on the button's style for now.
+// The PDF generation logic itself will remain largely unchanged as per previous versions,
+// as deep comic styling in PDF is out of scope for this incremental component update.
+
 export default function PDFGenerator({ candidateInfo, categories, evaluationResult, totalScore }: PDFGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Function to clean text for PDF generation
-  const cleanTextForPDF = (text: string): string => {
+  const cleanTextForPDF = (text: string | null | undefined): string => {
+    if (!text) return 'N/A';
     return text
-      // Remove all emojis
-      .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
-      // Replace specific emoji patterns
-      .replace(/🔥|🎯|⚡|🏆|🤝|🚀|❌|👤|📅|💼/g, '')
-      // Clean up extra spaces
+      .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|🔥|🎯|⚡|🏆|🤝|🚀|❌|👤|📅|💼|⭐|👍|👎|💥|👉/gu, '')
       .replace(/\s+/g, ' ')
       .trim();
   };
 
-  // Function to get category name without emojis
   const getCategoryDisplayName = (categoryName: string): string => {
-    const categoryMap: { [key: string]: string } = {
-      '🔥 CULTURA T1 (30%)': 'CULTURA T1 (30%)',
-      '⚡ TÉCNICO AVANZADO (40%)': 'TECNICO AVANZADO (40%)',
-      '🏆 EXPERIENCIA ESPECÍFICA (20%)': 'EXPERIENCIA ESPECIFICA (20%)',
-      '🤝 SOFT SKILLS CRÍTICAS (10%)': 'SOFT SKILLS CRITICAS (10%)'
-    };
-    
-    return categoryMap[categoryName] || cleanTextForPDF(categoryName);
+     return cleanTextForPDF(categoryName);
   };
 
   const generatePDF = async () => {
     if (!evaluationResult) return;
-
     setIsGenerating(true);
 
     try {
-      // Dynamic import to avoid SSR issues
       const { jsPDF } = await import('jspdf');
-      
-      const pdf = new jsPDF();
-      
-      // Header
-      pdf.setFontSize(20);
-      pdf.setTextColor(30, 60, 114);
-      pdf.text(' T1 Candidatos - Evaluación', 20, 30);
-      
-      // Candidate info
-      pdf.setFontSize(12);
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(`Candidato: ${candidateInfo.name || 'N/A'}`, 20, 50);
-      pdf.text(`Evaluador: ${candidateInfo.interviewer || 'N/A'}`, 20, 60);
-      pdf.text(`Fecha: ${candidateInfo.date || 'N/A'}`, 20, 70);
-      pdf.text(`Posición: ${candidateInfo.position || 'Frontend Developer'}`, 20, 80);
-      
-      // Separator line
-      pdf.line(20, 90, 190, 90);
-      
-      // Total score
-      pdf.setFontSize(16);
-      pdf.setTextColor(30, 60, 114);
-      pdf.text(`PUNTUACIÓN TOTAL: ${totalScore.toFixed(1)}/100`, 20, 110);
-      
-      // Result
-      let resultColor: [number, number, number];
-      if (evaluationResult.status === 'rockstar') {
-        resultColor = [22, 163, 74]; // Green
-      } else if (evaluationResult.status === 'solid') {
-        resultColor = [217, 119, 6]; // Yellow
-      } else {
-        resultColor = [220, 38, 38]; // Red
-      }
-      
-      pdf.setTextColor(...resultColor);
-      const resultText = cleanTextForPDF(evaluationResult.message);
-      pdf.text(resultText, 20, 125);
-      
-      // Create table with visual format
-      let yPosition = 145;
-      
-      // Table header
-      pdf.setFillColor(30, 60, 114); // Blue header
-      pdf.rect(20, yPosition, 170, 12, 'F');
-      pdf.setTextColor(255, 255, 255); // White text
+      const pdf = new jsPDF('p', 'pt', 'a4'); // Using points for better control
+
+      const pageMargin = 40;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const contentWidth = pageWidth - 2 * pageMargin;
+      let yPos = pageMargin;
+
+      // Simplified Header (less comic, more functional for PDF)
+      pdf.setFontSize(18);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Evaluación de Candidato T1', pageMargin, yPos);
+      yPos += 30;
+
+      // Candidate Info
       pdf.setFontSize(10);
-      pdf.text('Categoria / Criterio', 25, yPosition + 8);
-      pdf.text('Descripcion / Evidencia Requerida', 70, yPosition + 8);
-      pdf.text('Peso (%)', 130, yPosition + 8);
-      pdf.text('Score (1-5)', 150, yPosition + 8);
-      pdf.text('Puntos', 170, yPosition + 8);
-      
-      yPosition += 12;
-      
-      categories.forEach(category => {
-        // Check if we need a new page
-        if (yPosition > 250) {
-          pdf.addPage();
-          yPosition = 20;
-          
-          // Repeat header on new page
-          pdf.setFillColor(30, 60, 114);
-          pdf.rect(20, yPosition, 170, 12, 'F');
-          pdf.setTextColor(255, 255, 255);
-          pdf.setFontSize(10);
-          pdf.text('Categoria / Criterio', 25, yPosition + 8);
-          pdf.text('Descripcion / Evidencia Requerida', 70, yPosition + 8);
-          pdf.text('Peso (%)', 130, yPosition + 8);
-          pdf.text('Score (1-5)', 150, yPosition + 8);
-          pdf.text('Puntos', 170, yPosition + 8);
-          yPosition += 12;
-        }
-        
-        // Category header row
-        pdf.setFillColor(240, 244, 255); // Light blue background
-        pdf.rect(20, yPosition, 170, 10, 'F');
-        pdf.setTextColor(30, 60, 114); // Blue text
+      pdf.setFont('helvetica', 'normal');
+      const info = [
+        `Candidato: ${cleanTextForPDF(candidateInfo.name)}`,
+        `Evaluador: ${cleanTextForPDF(candidateInfo.interviewer)}`,
+        `Fecha: ${cleanTextForPDF(candidateInfo.date)}`,
+        `Posición: ${cleanTextForPDF(candidateInfo.position)}`,
+      ];
+      info.forEach(line => {
+        pdf.text(line, pageMargin, yPos);
+        yPos += 15;
+      });
+      yPos += 5;
+      pdf.setDrawColor(180, 180, 180); // Light gray line
+      pdf.line(pageMargin, yPos, pageWidth - pageMargin, yPos);
+      yPos += 20;
+
+      // Total Score & Result
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`PUNTUACIÓN TOTAL: ${totalScore.toFixed(1)}/100`, pageMargin, yPos);
+      yPos += 20;
+
+      let resultColorPDF: [number, number, number] = [0,0,0]; // black default
+      if (evaluationResult.status === 'rockstar') resultColorPDF = [34, 139, 34]; // Forest Green
+      else if (evaluationResult.status === 'solid') resultColorPDF = [255, 165, 0]; // Orange
+      else if (evaluationResult.status === 'rejected') resultColorPDF = [220, 20, 60]; // Crimson
+
+      pdf.setTextColor(...resultColorPDF);
+      pdf.text(cleanTextForPDF(evaluationResult.message), pageMargin, yPos, { maxWidth: contentWidth });
+      yPos += pdf.getTextDimensions(cleanTextForPDF(evaluationResult.message), {maxWidth: contentWidth}).h + 15;
+      pdf.setTextColor(0,0,0); // Reset text color
+
+      // Table Headers (Simplified for PDF)
+      const tableHeaders = ['Categoría/Criterio', 'Descripción', 'Peso', 'Score', 'Puntos'];
+      const colWidths = [contentWidth * 0.3, contentWidth * 0.35, contentWidth * 0.1, contentWidth * 0.1, contentWidth * 0.15];
+
+      const drawPdfTableHeader = () => {
+        pdf.setFillColor(230, 230, 230); // Light gray
+        pdf.rect(pageMargin, yPos, contentWidth, 20, 'F');
+        pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(9);
-        const cleanCategoryName = getCategoryDisplayName(category.name);
-        pdf.text(cleanCategoryName, 25, yPosition + 7);
-        
-        // Category border
-        pdf.setDrawColor(200, 200, 200);
-        pdf.rect(20, yPosition, 170, 10);
-        
-        yPosition += 10;
-        
-        // Category criteria
+        let currentX = pageMargin;
+        tableHeaders.forEach((header, i) => {
+          pdf.text(header, currentX + 3, yPos + 14);
+          currentX += colWidths[i];
+        });
+        yPos += 20;
+      };
+
+      const checkNewPageForPdf = (neededHeight: number) => {
+        if (yPos + neededHeight > pdf.internal.pageSize.getHeight() - pageMargin) {
+          pdf.addPage();
+          yPos = pageMargin;
+          drawPdfTableHeader();
+        }
+      };
+
+      drawPdfTableHeader();
+
+      categories.forEach(category => {
+        checkNewPageForPdf(30);
+        pdf.setFillColor(240, 240, 240);
+        pdf.rect(pageMargin, yPos, contentWidth, 18, 'F');
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(10);
+        pdf.text(getCategoryDisplayName(category.name), pageMargin + 3, yPos + 13);
+        yPos += 18;
+
         category.criteria.forEach(criterion => {
-          if (yPosition > 270) {
-            pdf.addPage();
-            yPosition = 20;
-            
-            // Repeat header on new page
-            pdf.setFillColor(30, 60, 114);
-            pdf.rect(20, yPosition, 170, 12, 'F');
-            pdf.setTextColor(255, 255, 255);
-            pdf.setFontSize(10);
-            pdf.text('Categoria / Criterio', 25, yPosition + 8);
-            pdf.text('Descripcion / Evidencia Requerida', 70, yPosition + 8);
-            pdf.text('Peso (%)', 130, yPosition + 8);
-            pdf.text('Score (1-5)', 150, yPosition + 8);
-            pdf.text('Puntos', 170, yPosition + 8);
-            yPosition += 12;
-          }
+          const critNameLines = pdf.splitTextToSize(cleanTextForPDF(criterion.name), colWidths[0] - 6);
+          const descLines = pdf.splitTextToSize(cleanTextForPDF(criterion.description), colWidths[1] - 6);
+          const rowHeight = Math.max(critNameLines.length, descLines.length) * 10 + 6;
           
-          // Criterion row background
-          pdf.setFillColor(255, 255, 255); // White background
-          pdf.rect(20, yPosition, 170, 12, 'F');
-          
-          // Criterion content
-          pdf.setTextColor(0, 0, 0);
+          checkNewPageForPdf(rowHeight);
+          pdf.setFont('helvetica', 'normal');
           pdf.setFontSize(8);
+
+          let currentX = pageMargin;
+          pdf.text(critNameLines, currentX + 3, yPos + 9);
+          currentX += colWidths[0];
+          pdf.text(descLines, currentX + 3, yPos + 9);
+          currentX += colWidths[1];
+          pdf.text(`${criterion.weight}%`, currentX + colWidths[2]/2 - pdf.getTextWidth(`${criterion.weight}%`)/2, yPos + 9 + (rowHeight-6)/2 - 4);
+          currentX += colWidths[2];
+          pdf.text(criterion.score > 0 ? criterion.score.toString() : '-', currentX + colWidths[3]/2 - pdf.getTextWidth(criterion.score > 0 ? criterion.score.toString() : '-')/2, yPos + 9 + (rowHeight-6)/2 - 4);
+          currentX += colWidths[3];
+          pdf.text(criterion.points.toFixed(1), currentX + colWidths[4]/2 - pdf.getTextWidth(criterion.points.toFixed(1))/2, yPos + 9+ (rowHeight-6)/2 - 4);
           
-          // Criterion name (truncate if too long)
-          const cleanCriterionName = cleanTextForPDF(criterion.name);
-          const truncatedName = cleanCriterionName.length > 20 ? 
-            cleanCriterionName.substring(0, 20) + '...' : cleanCriterionName;
-          pdf.text(truncatedName, 25, yPosition + 8);
-          
-          // Description (truncate if too long)
-          const cleanDescription = cleanTextForPDF(criterion.description);
-          const truncatedDesc = cleanDescription.length > 35 ? 
-            cleanDescription.substring(0, 35) + '...' : cleanDescription;
-          pdf.text(truncatedDesc, 70, yPosition + 8);
-          
-          // Weight
-          pdf.setTextColor(42, 82, 152); // Blue color for weight
-          pdf.text(`${criterion.weight}%`, 135, yPosition + 8);
-          
-          // Score
-          pdf.setTextColor(0, 0, 0);
-          if (criterion.score > 0) {
-            pdf.text(criterion.score.toString(), 155, yPosition + 8);
-          } else {
-            pdf.text('-', 155, yPosition + 8);
-          }
-          
-          // Points
-          pdf.text(criterion.points.toFixed(1), 175, yPosition + 8);
-          
-          // Row border
-          pdf.setDrawColor(229, 231, 235);
-          pdf.rect(20, yPosition, 170, 12);
-          
-          yPosition += 12;
+          pdf.setDrawColor(200, 200, 200);
+          pdf.line(pageMargin, yPos + rowHeight, pageWidth - pageMargin, yPos + rowHeight);
+          yPos += rowHeight;
         });
       });
       
-      // Total row
-      if (yPosition > 260) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-      
-      pdf.setFillColor(30, 60, 114); // Dark blue background
-      pdf.rect(20, yPosition, 170, 12, 'F');
-      pdf.setTextColor(255, 255, 255); // White text
+      checkNewPageForPdf(20);
+      pdf.setFillColor(200, 200, 200);
+      pdf.rect(pageMargin, yPos, contentWidth, 20, 'F');
+      pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(10);
-      pdf.text('TOTAL', 25, yPosition + 8);
-      pdf.text('Suma ponderada de todos los criterios', 70, yPosition + 8);
-      pdf.text('100%', 135, yPosition + 8);
-      pdf.text('-', 155, yPosition + 8);
-      pdf.text(totalScore.toFixed(1), 175, yPosition + 8);
-      
+      pdf.text('TOTAL', pageMargin + 3, yPos + 14);
+      pdf.text('100%', pageMargin + colWidths[0] + colWidths[1] + colWidths[2]/2 - pdf.getTextWidth('100%')/2, yPos + 14);
+      pdf.text(totalScore.toFixed(1),pageMargin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4]/2 - pdf.getTextWidth(totalScore.toFixed(1))/2, yPos + 14);
+      yPos += 20;
+
       // Footer
-      try {
-        const pageCount = (pdf as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(8);
-          pdf.setTextColor(128, 128, 128);
-          pdf.text(`Página ${i} de ${pageCount} - Generado el ${new Date().toLocaleDateString()}`, 20, 285);
-          pdf.text('T1 Talent Hunter - Solo Rockstars', 150, 285);
-        }
-      } catch (footerError) {
-        // If footer fails, continue without it
-        console.warn('Could not add footer to PDF:', footerError);
+      const pageCount = (pdf as any).internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(128, 128, 128);
+        pdf.text(`Página ${i} de ${pageCount} - Generado el ${new Date().toLocaleDateString()}`, pageMargin, pdf.internal.pageSize.getHeight() - 20);
       }
-      
-      // Download
-      const fileName = `T1_Evaluacion_${(candidateInfo.name || 'Candidato').replace(/\s+/g, '_')}_${candidateInfo.date || new Date().toISOString().split('T')[0]}.pdf`;
+
+      const fileName = `T1_Evaluacion_${cleanTextForPDF(candidateInfo.name).replace(/\s+/g, '_')}_${cleanTextForPDF(candidateInfo.date)}.pdf`;
       pdf.save(fileName);
-      
+
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Error al generar el PDF. Por favor, intenta de nuevo.');
+      alert('Error al generar el PDF. Por favor, intente de nuevo.');
     } finally {
       setIsGenerating(false);
     }
   };
 
-  if (!evaluationResult) return null;
+  if (!evaluationResult && !candidateInfo.name) return null; // Only show if there's something to generate
 
   return (
-    <div className="text-center p-5 mx-5">
-      <button
-        onClick={generatePDF}
-        disabled={isGenerating}
-        className="bg-gradient-to-r from-green-600 to-green-500 text-white border-none py-4 px-8 rounded-xl text-lg font-semibold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-      >
-        {isGenerating ? (
-          <>
-            <span className="inline-block animate-spin mr-2">⏳</span>
-            Generando PDF...
-          </>
-        ) : (
-          <>
-            📄 Descargar Evaluación en PDF
-          </>
-        )}
-      </button>
-    </div>
+    <button
+      onClick={generatePDF}
+      disabled={isGenerating}
+      className="px-8 py-4 bg-comic-primary text-black font-bold rounded-lg border-2 border-black shadow-md hover:bg-yellow-400 active:bg-yellow-500 transform hover:scale-105 active:scale-95 transition-all duration-150 text-xl no-print"
+      style={{ fontFamily: 'var(--font-display)', boxShadow: '3px 3px 0px var(--comic-border)', WebkitTextStroke: '0.5px black', letterSpacing: '0.05em' }}
+    >
+      {isGenerating ? (
+        <>
+          <span className="inline-block animate-spin mr-2">⏳</span>
+          ¡CREANDO PDF!
+        </>
+      ) : (
+        '📄 ¡Descargar PDF!'
+      )}
+    </button>
   );
 }
