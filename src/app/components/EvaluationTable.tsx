@@ -86,17 +86,17 @@ export default function EvaluationTable({ categories, totalScore, onScoreUpdate 
           ))}
           
           {/* Total Row */}
-          <tr className="bg-comic-secondary text-white" style={{ fontFamily: 'var(--font-display)'}}>
-            <td className={`${tdClass} text-3xl`} colSpan={2}>
+          <tr className="bg-comic-secondary text-black" style={{ fontFamily: 'var(--font-display)'}}>
+            <td className={`${tdClass} text-3xl`} colSpan={2} style={{ WebkitTextStroke: '1px white', paintOrder: 'stroke fill' }}>
               ¡TOTAL!
             </td>
-            <td className={`${tdClass} text-center text-2xl`}>
+            <td className={`${tdClass} text-center text-2xl`} style={{ WebkitTextStroke: '1px white', paintOrder: 'stroke fill' }}>
               100%
             </td>
             <td className={`${tdClass} text-center text-2xl`}>
-              💥
+              💥 {/* Emoji might be fine as is, or consider a text stroke if it blends */}
             </td>
-            <td className={`${tdClass} text-center text-4xl`}>
+            <td className={`${tdClass} text-center text-4xl`} style={{ WebkitTextStroke: '1px white', paintOrder: 'stroke fill' }}>
               {totalScore.toFixed(1)}
             </td>
           </tr>
